@@ -1,0 +1,27 @@
+<html>
+	{% extends "navbar.html" %}
+	{% block content %}
+	{{ super() }}
+    <head>
+        <title>{{eventInfo[0]["eventName"]}}</title>
+    </head>
+    <body>
+        <h1>{{eventInfo[0]["eventName"]}}</h1>
+        <div>
+            {% for info in eventInfo %}
+				Host: {{info.eventOwner}} <br>
+				Date: {{info.eventDate}} <br>
+				Location: {{info.eventLocation}} <br>
+				Description : <br>{{info.eventDescription}}<br>
+				<form action="/going" method="GET">
+				<input type="hidden" name="eventID" value={{info.eventID}}>
+				<input type="hidden" name="attend" value={{attend}}>
+				<input type="submit" value="{{attend}}">
+				</form>
+				<br>
+			{% endfor %}
+        </div>
+        <a href="/">Go back</a>
+    </body>
+	{% endblock %}
+</html>
