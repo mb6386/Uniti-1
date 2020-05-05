@@ -5,6 +5,7 @@ import hashlib
 import pymysql.cursors
 from functools import wraps
 import time
+import datetime
 
 app = Flask(__name__)
 app.secret_key = "super secret key"
@@ -82,7 +83,11 @@ def profile():
     with connection.cursor() as cursor:
         cursor.execute(searchQuery, (session["username"]))
         user_data = cursor.fetchall()[0]
-    return render_template("profile.html", status=status, feed=feed_data, user=user_data)
+        today = datetime.date.today().strftime('%Y-%m-%d')
+        age = int(today.split('-')[0]) - int(user_data["dob"].split('-')[0])
+        if int(user_data["dob"].split('-')[1]) > int(today.split('-')[1]) or int((user_data["dob"].split('-')[1]) == int(today.split('-')[1]) and int(user_data["dob"].split('-')[2]) > int(today.split('-')[2])):
+            age-=1
+    return render_template("profile.html", status=status, feed=feed_data, user=user_data, age=age)
 
 @app.route("/event", methods=["GET"])
 @login_required
@@ -171,6 +176,8 @@ def registerAuth():
         hashedPassword = hashlib.sha256(plaintextPassword.encode("utf-8")).hexdigest()
         firstName = requestData["fname"]
         lastName = requestData["lname"]
+        city = requestData["city"]
+        state = requestData["state"]
         dob = requestData["dob"]      
         sex = requestData["sex"]       
         occupation = requestData["occupation"]        
@@ -178,8 +185,8 @@ def registerAuth():
         profilePic = requestData["profilePic"]
         try:
             with connection.cursor() as cursor:
-                query = "INSERT INTO Person (username, password, firstName, lastName, email, dob, sex, occupation, bio, profilePic) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-                cursor.execute(query, (username, hashedPassword, firstName, lastName, email, dob, sex, occupation, bio, profilePic))
+                query = "INSERT INTO Person (username, password, firstName, lastName, city, state, email, dob, sex, occupation, bio, profilePic) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+                cursor.execute(query, (username, hashedPassword, firstName, lastName, city, state, email, dob, sex, occupation, bio, profilePic))
         except pymysql.err.IntegrityError:
             error = "%s is already taken." % (username)
             return render_template('register.html', error=error)
