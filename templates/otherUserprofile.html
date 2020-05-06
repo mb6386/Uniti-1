@@ -4,7 +4,9 @@
 
 <div class="d-flex p-2 bd-highlight">
 	<div class="d-flex align-items-start">
-	  <div class="card">
+	
+	<div style="display:flex; flex-direction: column;"">
+	  <div class="card" style="flex-grow: 1; display:flex; align-items:center;">
 		<div class="additional">
 		  <div class="user-card">
 			<div class="level center">
@@ -108,6 +110,16 @@
 		  <span class="more">Mouse over the card for more info</span>
 		</div>
 	  </div>
+	  
+	  <div style="flex-grow: 1; display:flex; align-items:center; justify-content: center;">
+	  <form action="/follow" method="GET">
+		  <input type="hidden" name="user" value={{user.username}}>
+		  <input type="hidden" name="followStatus" value={{followStatus}}>
+		  <input class="btn btn-primary" type="submit" value={{followStatus}}>
+	  </form>
+	  </div>
+	  
+	</div>
   
 	</div>
 	<div class="d-flex align-items-end">

@@ -1,0 +1,37 @@
+<html>
+	{% extends "navbar.html" %}
+	{% block content %}
+	{{ super() }}
+    <head>
+        <title>Search</title>
+    </head>
+    <body>
+        <h1 style="padding-left: 1%; padding-top: 1%;">Users</h1>
+		<form class="form-inline my-2 my-lg-0" action="/searchEvent" method="GET">
+            <input class="form-control mr-sm-2" name=event type="search" placeholder="Event" aria-label="Search">
+            <button class="btn btn-outline-success btn-light my-2 my-sm-0" type="submit">Search</button>
+        </form>
+        <div class="d-flex flex-row flex-wrap bd-highlight">
+            {% for user in users %}
+				<div style="align-items: center">
+					<div class="text-dark">
+						<div class="card" style="width: 50rem; height: auto">
+							<h2 class="card-header">{{user.username}}</h2>
+							<div class="card-body">
+								<div class="card-text">{{user.lastName}}, {{user.firstName}}</div>
+								<div class="card-text">Occupation: {{user.occupation}}</div>
+								<div class="card-title">Location: {{user.city}}, {{user.state}}</div>
+								<div class="card-text">Bio :<br>{{user.bio}}</div>
+								<form action="/checkUser" method="GET">
+									<input type="hidden" name="user" value={{user.username}}>
+									<input class="btn btn-primary" type="submit" value="Details">
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+            {% endfor %}
+        </div>
+    </body>
+	{% endblock %}
+</html>

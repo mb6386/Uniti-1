@@ -12,10 +12,10 @@ app.secret_key = "super secret key"
 IMAGES_DIR = os.path.join(os.getcwd(), "images")
 connection = pymysql.connect(host="localhost",
                              user="root",
-                             password="",
+                             password="password",
                              db="uniti",
                              charset="utf8mb4",
-                             port=3308,
+                             port=3306,
                              cursorclass=pymysql.cursors.DictCursor,
                              autocommit=True)
 
@@ -41,7 +41,7 @@ def index():
 @login_required
 def home():
     username = session["username"]
-    feedQuery = "SELECT * FROM Events NATURAL JOIN eventgoing WHERE attendee = %s"
+    feedQuery = "SELECT * FROM events NATURAL JOIN eventgoing WHERE attendee = (SELECT usernameFollowed FROM follow WHERE usernameFollower = %s)"
     with connection.cursor() as cursor:
         cursor.execute(feedQuery, (username))
         feed_data = cursor.fetchall()
@@ -59,7 +59,6 @@ def upload():
 @app.route("/feed", methods=["GET"])
 @login_required
 def feed():
-    status = "Feed"
     feedQuery = "SELECT * FROM Events ORDER BY eventID DESC LIMIT 10"
     with connection.cursor() as cursor:
         cursor.execute(feedQuery)
@@ -67,13 +66,12 @@ def feed():
     login = False
     if "username" in session:
         login = True
-    return render_template("feed.html", status=status, feed=feed_data, login=login)
+    return render_template("feed.html", feed=feed_data, login=login)
 
 
-@app.route("/search", methods=["GET"])
+@app.route("/searchEvent", methods=["GET"])
 @login_required
-def search():
-    status = "Search"
+def searchEvent():
     event = request.args["event"]
     event = "%" + event + "%"
     searchQuery = "SELECT * FROM events WHERE eventName LIKE %s OR eventDescription LIKE %s"
@@ -83,12 +81,60 @@ def search():
     login = False
     if "username" in session:
         login = True
-    return render_template("feed.html", status=status, feed=feed_data, login=login)
+    return render_template("searchEvent.html", feed=feed_data, login=login)
+
+
+@app.route("/searchUser", methods=["GET"])
+@login_required
+def searchUser():
+    user = request.args["user"]
+    user = "%" + user + "%"
+    searchQuery = "SELECT * FROM person WHERE username LIKE %s OR firstName LIKE %s OR lastName LIKE %s"
+    with connection.cursor() as cursor:
+        cursor.execute(searchQuery, (user, user, user))
+        user_data = cursor.fetchall()
+    login = False
+    if "username" in session:
+        login = True
+    return render_template("searchUser.html", users=user_data, login=login)
+
+
+@app.route("/checkUser", methods=["GET"])
+@login_required
+def checkUser():
+    user = request.args["user"]
+    searchQuery = "SELECT * FROM events WHERE eventOwner = %s Order BY eventID DESC"
+    with connection.cursor() as cursor:
+        cursor.execute(searchQuery, (user))
+        feed_data = cursor.fetchall()
+    searchQuery = "SELECT * FROM person WHERE username = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(searchQuery, (user))
+        user_data = cursor.fetchall()[0]
+        today = datetime.date.today().strftime('%Y-%m-%d')
+        age = int(today.split('-')[0]) - int(user_data["dob"].split('-')[0])
+        if int(user_data["dob"].split('-')[1]) > int(today.split('-')[1]) or int(
+                                (user_data["dob"].split('-')[1]) == int(today.split('-')[1]) and int(
+                        user_data["dob"].split('-')[2]) > int(today.split('-')[2])):
+            age -= 1
+
+    followQuery = "SELECT * FROM follow WHERE usernameFollowed = %s AND usernameFollower = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(followQuery, (user, session["username"]))
+        follow_data = cursor.fetchall()
+        if (len(follow_data) == 0):
+            followStatus = "Follow"
+        else:
+            followStatus = "Unfollow"
+    login = False
+    if "username" in session:
+        login = True
+    return render_template("otherUserprofile.html", feed=feed_data, user=user_data, age=age, followStatus=followStatus, login=login)
+
 
 @app.route("/profile", methods=["GET"])
 @login_required
 def profile():
-    status = "Profile"
     searchQuery = "SELECT * FROM events WHERE eventOwner = %s Order BY eventID DESC"
     with connection.cursor() as cursor:
         cursor.execute(searchQuery, (session["username"]))
@@ -104,7 +150,46 @@ def profile():
     login = False
     if "username" in session:
         login = True    
-    return render_template("profile.html", status=status, feed=feed_data, user=user_data, age=age, login=login)
+    return render_template("profile.html", feed=feed_data, user=user_data, age=age, login=login)
+
+
+@app.route("/follow", methods=["GET"])
+@login_required
+def follow():
+    followStatus = request.args["followStatus"]
+    followed = request.args["user"]
+    follower = session["username"]
+
+    with connection.cursor() as cursor:
+        if (followStatus == "Follow"):
+            goingQuery = "INSERT INTO follow (usernameFollowed, usernameFollower) VALUES (%s, %s)"
+            followStatus = "Unfollow"
+            cursor.execute(goingQuery, (followed, follower))
+        elif (followStatus == "Unfollow"):
+            goingQuery = "DELETE FROM follow WHERE usernameFollowed = %s AND usernameFollower = %s"
+            followStatus = "Follow"
+            cursor.execute(goingQuery, (followed, follower))
+
+    searchQuery = "SELECT * FROM events WHERE eventOwner = %s Order BY eventID DESC"
+    with connection.cursor() as cursor:
+        cursor.execute(searchQuery, (followed))
+        feed_data = cursor.fetchall()
+    searchQuery = "SELECT * FROM person WHERE username = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(searchQuery, (followed))
+        user_data = cursor.fetchall()[0]
+        today = datetime.date.today().strftime('%Y-%m-%d')
+        age = int(today.split('-')[0]) - int(user_data["dob"].split('-')[0])
+        if int(user_data["dob"].split('-')[1]) > int(today.split('-')[1]) or int(
+                                (user_data["dob"].split('-')[1]) == int(today.split('-')[1]) and int(
+                    user_data["dob"].split('-')[2]) > int(today.split('-')[2])):
+            age -= 1
+
+    login = False
+    if "username" in session:
+        login = True
+    return render_template("otherUserprofile.html", feed=feed_data, user=user_data, age=age, followStatus=followStatus, login=login)
+
 
 @app.route("/event", methods=["GET"])
 @login_required

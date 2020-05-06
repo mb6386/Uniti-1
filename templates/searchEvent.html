@@ -1,10 +1,14 @@
 <html>
+	{% extends "navbar.html" %}
+	{% block content %}
+	{{ super() }}
     <head>
+        <title>Search</title>
     </head>
     <body>
         <h1 style="padding-left: 1%; padding-top: 1%;">Events</h1>
 		<form class="form-inline my-2 my-lg-0" action="/searchEvent" method="GET">
-            <input class="form-control mr-sm-2" name="event" type="search" placeholder="Event" aria-label="Search">
+            <input class="form-control mr-sm-2" name=event type="search" placeholder="Event" aria-label="Search">
             <button class="btn btn-outline-success btn-light my-2 my-sm-0" type="submit">Search</button>
         </form>
         <div class="d-flex flex-row flex-wrap bd-highlight">
@@ -29,4 +33,5 @@
             {% endfor %}
         </div>
     </body>
+	{% endblock %}
 </html>
