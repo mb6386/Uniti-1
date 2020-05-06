@@ -202,6 +202,11 @@ def event():
         cursor.execute(eventQuery, (eventID))
         event_data = cursor.fetchall()
 
+    if event_data[0]["eventOwner"] == username:
+        userisHost = 1
+    else:
+        userisHost = 0
+
     attendanceQuery = "SELECT attendee FROM eventgoing WHERE eventID = %s"
     with connection.cursor() as cursor:
         cursor.execute(attendanceQuery, (eventID))
@@ -218,7 +223,7 @@ def event():
     login = False
     if "username" in session:
         login = True
-    return render_template("event.html", eventInfo=event_data, attendance=attendance_data, attend=attend, login=login)
+    return render_template("event.html", eventInfo=event_data, attendance=attendance_data, attend=attend, userisHost=userisHost, login=login)
 
 
 @app.route("/going", methods=["GET"])
@@ -251,6 +256,30 @@ def going():
         login = True
     return render_template("event.html", eventInfo=event_data, attendance=attendance_data, attend=attend, login=login)
 
+
+@app.route("/deleteEvent", methods=["GET"])
+@login_required
+def deleteEvent():
+    username = session["username"]
+    eventID = request.args["eventID"]
+
+    goingQuery = "DELETE FROM eventgoing WHERE eventID = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(goingQuery, (eventID))
+
+    eventQuery = "DELETE FROM events WHERE eventID = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(eventQuery, (eventID))
+
+    feedQuery = "SELECT * FROM events NATURAL JOIN eventgoing WHERE attendee = (SELECT usernameFollowed FROM follow WHERE usernameFollower = %s)"
+    with connection.cursor() as cursor:
+        cursor.execute(feedQuery, (username))
+        feed_data = cursor.fetchall()
+
+    login = False
+    if "username" in session:
+        login = True
+    return render_template("home.html", feed=feed_data, username=session["username"], login=login)
 
 @app.route("/login", methods=["GET"])
 def login():

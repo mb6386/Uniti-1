@@ -17,15 +17,22 @@
 						<div class="card-text">Description : <br>{{info.eventDescription}}</div>
 						<br>
 						<form action="/going" method="GET">
-						<input type="hidden" name="eventID" value={{info.eventID}}>
-						<input type="hidden" name="attend" value={{attend}}>
-						<input class="btn btn-primary" type="submit" value="{{attend}}">
+							<input type="hidden" name="eventID" value={{info.eventID}}>
+							<input type="hidden" name="attend" value={{attend}}>
+							<input class="btn btn-primary" type="submit" value="{{attend}}">
 						</form>
 						<br>
 						<h2 class="card-title">Attending</h2>
 						{% for person in attendance %}
 							<div class="card-text">{{person.attendee}}</div>
 						{% endfor %}
+						<br>
+						{% if userisHost == True %}
+						<form action="/deleteEvent" method="GET">
+							<input type="hidden" name="eventID" value={{eventInfo[0]["eventID"]}}>
+							<input class="btn btn-primary" type="submit" value="Delete">
+						</form>
+						{% endif %}
 					</div>
 				</div>
 			</div>
