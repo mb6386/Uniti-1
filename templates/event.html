@@ -5,22 +5,31 @@
     <head>
         <title>{{eventInfo[0]["eventName"]}}</title>
     </head>
-    <body>
-        <h1>{{eventInfo[0]["eventName"]}}</h1>
-        <div>
+    <body style="text-align: center">
             {% for info in eventInfo %}
-				Host: {{info.eventOwner}} <br>
-				Date: {{info.eventDate}} <br>
-				Location: {{info.eventLocation}} <br>
-				Description : <br>{{info.eventDescription}}<br>
-				<form action="/going" method="GET">
-				<input type="hidden" name="eventID" value={{info.eventID}}>
-				<input type="hidden" name="attend" value={{attend}}>
-				<input type="submit" value="{{attend}}">
-				</form>
-				<br>
+			<div class="text-dark">
+				<div class="card" style="width: auto; height: auto">
+					<h1 class="card-header">{{eventInfo[0]["eventName"]}}</h1>
+					<div class="card-body">
+						<div class="card-title">Host: {{info.eventOwner}}</div>
+						<div class="card-title">Date: {{info.eventDate}}</div>
+						<div class="card-title">Location: {{info.eventLocation}}</div>
+						<div class="card-text">Description : <br>{{info.eventDescription}}</div>
+						<br>
+						<form action="/going" method="GET">
+						<input type="hidden" name="eventID" value={{info.eventID}}>
+						<input type="hidden" name="attend" value={{attend}}>
+						<input class="btn btn-primary" type="submit" value="{{attend}}">
+						</form>
+						<br>
+						<h2 class="card-title">Attending</h2>
+						{% for person in attendance %}
+							<div class="card-text">{{person.attendee}}</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
 			{% endfor %}
-        </div>
         <a href="/">Go back</a>
     </body>
 	{% endblock %}

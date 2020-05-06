@@ -12,10 +12,10 @@ app.secret_key = "super secret key"
 IMAGES_DIR = os.path.join(os.getcwd(), "images")
 connection = pymysql.connect(host="localhost",
                              user="root",
-                             password="",
+                             password="password",
                              db="uniti",
                              charset="utf8mb4",
-                             port=3308,
+                             port=3306,
                              cursorclass=pymysql.cursors.DictCursor,
                              autocommit=True)
 
@@ -40,7 +40,12 @@ def index():
 @app.route("/home")
 @login_required
 def home():
-    return render_template("home.html", username=session["username"])
+    username = session["username"]
+    feedQuery = "SELECT * FROM Events NATURAL JOIN eventgoing WHERE attendee = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(feedQuery, (username))
+        feed_data = cursor.fetchall()
+    return render_template("home.html", feed=feed_data)
 
 # create event page
 @app.route("/upload", methods=["GET"])
@@ -75,7 +80,7 @@ def search():
 @login_required
 def profile():
     status = "Profile"
-    searchQuery = "SELECT * FROM events WHERE eventOwner = %s"
+    searchQuery = "SELECT * FROM events WHERE eventOwner = %s Order BY eventID DESC"
     with connection.cursor() as cursor:
         cursor.execute(searchQuery, (session["username"]))
         feed_data = cursor.fetchall()
@@ -99,6 +104,12 @@ def event():
     with connection.cursor() as cursor:
         cursor.execute(eventQuery, (eventID))
         event_data = cursor.fetchall()
+
+    attendanceQuery = "SELECT attendee FROM eventgoing WHERE eventID = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(attendanceQuery, (eventID))
+        attendance_data = cursor.fetchall()
+
     goingQuery = "SELECT * FROM eventgoing WHERE attendee = %s AND eventID = %s"
     with connection.cursor() as cursor:
         cursor.execute(goingQuery, (username, eventID))
@@ -107,7 +118,7 @@ def event():
             attend = "Going"
         else:
             attend = "Not Going"
-    return render_template("event.html", eventInfo=event_data, attend=attend)
+    return render_template("event.html", eventInfo=event_data, attendance=attendance_data, attend=attend)
 
 
 @app.route("/going", methods=["GET"])
@@ -120,6 +131,7 @@ def going():
     with connection.cursor() as cursor:
         cursor.execute(eventQuery, (eventID))
         event_data = cursor.fetchall()
+
     with connection.cursor() as cursor:
         if (attend == "Going"):
             goingQuery = "INSERT INTO eventgoing (attendee, eventID) VALUES (%s, %s)"
@@ -130,7 +142,11 @@ def going():
             attend = "Going"
             cursor.execute(goingQuery, (username, eventID))
 
-    return render_template("event.html", eventInfo=event_data, attend=attend)
+    attendanceQuery = "SELECT attendee FROM eventgoing WHERE eventID = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(attendanceQuery, (eventID))
+        attendance_data = cursor.fetchall()
+    return render_template("event.html", eventInfo=event_data, attendance=attendance_data, attend=attend)
 
 
 @app.route("/login", methods=["GET"])

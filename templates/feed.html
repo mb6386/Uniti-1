@@ -6,20 +6,25 @@
         <title>{{status}}</title>
     </head>
     <body>
-        <h1>Events</h1>
-        <div>
+        <h1 style="padding-left: 1%; padding-top: 1%;">Events</h1>
+        <div class="d-flex flex-row flex-wrap bd-highlight">
             {% for event in feed %}
-				<div class="container"
-                {{event.eventName}} <br>
-				Host: {{event.eventOwner}} <br>
-				Date: {{event.eventDate}} <br>
-				Location: {{event.eventLocation}} <br>
-				Description :<br>{{event.eventDescription}}<br>
-				<form action="/event" method="GET">
-					<input type="hidden" name="eventID" value={{event.eventID}}>
-					<input type="submit" value="Details">
-				</form>
-				<br>
+				<div style="align-items: center">
+					<div class="text-dark">
+						<div class="card" style="width: 50rem; height: auto">
+							<h2 class="card-header">{{event.eventName}}</h2>
+							<div class="card-body">
+								<div class="card-text">Host: {{event.eventOwner}}</div>
+								<div class="card-text">Date: {{event.eventDate}}</div>
+								<div class="card-title">Location: {{event.eventLocation}}</div>
+								<div class="card-text">Description :<br>{{event.eventDescription}}</div>
+								<form action="/event" method="GET">
+									<input type="hidden" name="eventID" value={{event.eventID}}>
+									<input class="btn btn-primary" type="submit" value="Details">
+								</form>
+							</div>
+						</div>
+					</div>
 				</div>
             {% endfor %}
         </div>
