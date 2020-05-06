@@ -99,6 +99,34 @@ def searchUser():
     return render_template("searchUser.html", users=user_data, login=login)
 
 
+@app.route("/followers", methods=["GET"])
+@login_required
+def followers():
+    user = request.args["user"]
+    followQuery = "SELECT * FROM person WHERE username = (SELECT usernameFollower FROM follow WHERE usernameFollowed = %s)"
+    with connection.cursor() as cursor:
+        cursor.execute(followQuery, (user))
+        follow_data = cursor.fetchall()
+    login = False
+    if "username" in session:
+        login = True
+    return render_template("searchUser.html", users=follow_data, login=login)
+
+
+@app.route("/following", methods=["GET"])
+@login_required
+def following():
+    user = request.args["user"]
+    followQuery = "SELECT * FROM person WHERE username = (SELECT usernameFollowed FROM follow WHERE usernameFollower = %s)"
+    with connection.cursor() as cursor:
+        cursor.execute(followQuery, (user))
+        follow_data = cursor.fetchall()
+    login = False
+    if "username" in session:
+        login = True
+    return render_template("searchUser.html", users=follow_data, login=login)
+
+
 @app.route("/checkUser", methods=["GET"])
 @login_required
 def checkUser():

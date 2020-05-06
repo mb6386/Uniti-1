@@ -5,8 +5,8 @@
 <div class="d-flex p-2 bd-highlight">
 	<div class="d-flex align-items-start">
 	
-	<div style="display:flex; flex-direction: column;"">
-	  <div class="card" style="flex-grow: 1; display:flex; align-items:center;">
+	<div style="display:flex; flex-direction: column;">
+	  <div class="card">
 		<div class="additional">
 		  <div class="user-card">
 			<div class="level center">
@@ -111,12 +111,24 @@
 		</div>
 	  </div>
 	  
+	  <div style="flex-grow: 1; display:flex; justify-content: center;">
+		<form action="/followers" method="GET" style="padding-right: 1%;">
+			  <input type="hidden" name="user" value={{user.username}}>
+			  <input class="btn btn-primary" type="submit" value="Following">
+		</form>
+		
+		<form action="/following" method="GET" style="padding-left: 1%;">
+			  <input type="hidden" name="user" value={{user.username}}>
+			  <input class="btn btn-primary" type="submit" value="Followers">
+		  </form>
+	  </div>
+	  
 	  <div style="flex-grow: 1; display:flex; align-items:center; justify-content: center;">
-	  <form action="/follow" method="GET">
-		  <input type="hidden" name="user" value={{user.username}}>
-		  <input type="hidden" name="followStatus" value={{followStatus}}>
-		  <input class="btn btn-primary" type="submit" value={{followStatus}}>
-	  </form>
+		  <form action="/follow" method="GET">
+			  <input type="hidden" name="user" value={{user.username}}>
+			  <input type="hidden" name="followStatus" value={{followStatus}}>
+			  <input class="btn btn-primary" type="submit" value={{followStatus}}>
+		  </form>
 	  </div>
 	  
 	</div>
