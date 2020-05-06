@@ -12,10 +12,10 @@ app.secret_key = "super secret key"
 IMAGES_DIR = os.path.join(os.getcwd(), "images")
 connection = pymysql.connect(host="localhost",
                              user="root",
-                             password="password",
+                             password="",
                              db="uniti",
                              charset="utf8mb4",
-                             port=3306,
+                             port=3308,
                              cursorclass=pymysql.cursors.DictCursor,
                              autocommit=True)
 
@@ -45,7 +45,10 @@ def home():
     with connection.cursor() as cursor:
         cursor.execute(feedQuery, (username))
         feed_data = cursor.fetchall()
-    return render_template("home.html", feed=feed_data)
+    login = False
+    if "username" in session:
+        login = True
+    return render_template("home.html", feed=feed_data, username=session["username"], login=login)
 
 # create event page
 @app.route("/upload", methods=["GET"])
@@ -61,7 +64,10 @@ def feed():
     with connection.cursor() as cursor:
         cursor.execute(feedQuery)
         feed_data = cursor.fetchall()
-    return render_template("feed.html", status=status, feed=feed_data)
+    login = False
+    if "username" in session:
+        login = True
+    return render_template("feed.html", status=status, feed=feed_data, login=login)
 
 
 @app.route("/search", methods=["GET"])
@@ -74,7 +80,10 @@ def search():
     with connection.cursor() as cursor:
         cursor.execute(searchQuery, (event, event))
         feed_data = cursor.fetchall()
-    return render_template("feed.html", status=status, feed=feed_data)
+    login = False
+    if "username" in session:
+        login = True
+    return render_template("feed.html", status=status, feed=feed_data, login=login)
 
 @app.route("/profile", methods=["GET"])
 @login_required
@@ -91,8 +100,11 @@ def profile():
         today = datetime.date.today().strftime('%Y-%m-%d')
         age = int(today.split('-')[0]) - int(user_data["dob"].split('-')[0])
         if int(user_data["dob"].split('-')[1]) > int(today.split('-')[1]) or int((user_data["dob"].split('-')[1]) == int(today.split('-')[1]) and int(user_data["dob"].split('-')[2]) > int(today.split('-')[2])):
-            age-=1
-    return render_template("profile.html", status=status, feed=feed_data, user=user_data, age=age)
+            age -= 1
+    login = False
+    if "username" in session:
+        login = True    
+    return render_template("profile.html", status=status, feed=feed_data, user=user_data, age=age, login=login)
 
 @app.route("/event", methods=["GET"])
 @login_required
@@ -118,7 +130,10 @@ def event():
             attend = "Going"
         else:
             attend = "Not Going"
-    return render_template("event.html", eventInfo=event_data, attendance=attendance_data, attend=attend)
+    login = False
+    if "username" in session:
+        login = True
+    return render_template("event.html", eventInfo=event_data, attendance=attendance_data, attend=attend, login=login)
 
 
 @app.route("/going", methods=["GET"])
@@ -146,17 +161,26 @@ def going():
     with connection.cursor() as cursor:
         cursor.execute(attendanceQuery, (eventID))
         attendance_data = cursor.fetchall()
-    return render_template("event.html", eventInfo=event_data, attendance=attendance_data, attend=attend)
+    login = False
+    if "username" in session:
+        login = True
+    return render_template("event.html", eventInfo=event_data, attendance=attendance_data, attend=attend, login=login)
 
 
 @app.route("/login", methods=["GET"])
 def login():
-    return render_template("login.html")
+    login = False
+    if "username" in session:
+        login = True
+    return render_template("login.html", login=login)
 
 
 @app.route("/register", methods=["GET"])
 def register():
-    return render_template("register.html")
+    login = False
+    if "username" in session:
+        login = True
+    return render_template("register.html", login=login)
 
 
 @app.route("/loginAuth", methods=["POST"])
@@ -179,7 +203,10 @@ def loginAuth():
         return render_template("login.html", error=error)
 
     error = "An unknown error has occurred. Please try again."
-    return render_template("login.html", error=error)
+    login = False
+    if "username" in session:
+        login = True
+    return render_template("login.html", error=error, login=login)
 
 
 @app.route("/registerAuth", methods=["POST"])
@@ -210,13 +237,17 @@ def registerAuth():
         return redirect(url_for("login"))
 
     error = "An error has occurred. Please try again."
-    return render_template("register.html", error=error)
+    login = False
+    if "username" in session:
+        login = True
+    return render_template("register.html", error=error, login=login)
 
 
 @app.route("/logout", methods=["GET"])
 def logout():
-    session.pop("username")
-    return redirect("/")
+    if "username" in session:
+        session.pop("username")
+    return redirect("/login")
 
 # previously uploadimage
 @app.route("/uploadEvent", methods=["POST"])
@@ -234,7 +265,10 @@ def uploadEvent():
         with connection.cursor() as cursor:
             cursor.execute(uploadQuery, (event_owner, event_name, event_date, event_location, event_description))
         message = "Event Created"
-        return render_template("upload.html", message=message)
+    login = False
+    if "username" in session:
+        login = True
+    return render_template("upload.html", message=message, login=login)
 
 if __name__ == "__main__":
     if not os.path.isdir("images"):

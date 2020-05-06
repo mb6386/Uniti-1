@@ -2,59 +2,38 @@
 {% block content %}
 {{ super() }}
 <body>
-    <h1>Hello, {{ username }}!</h1>
-    <h4>Approve or deny the following friend group requests</h4>
-    <form action="/followAccept" method="post">
-        <ul>
-        {% for request in requests %}
-            <li>
-            <label for="{{request.username_follower}}">{{request.username_follower}}</label>
-            <input type="checkbox" name="{{request.username_follower}}">
-            </li>
-        {% endfor %}
-        </ul>
-        <input type="submit" value="Submit">
-    </form>
-    <h4>Type in the name of a user you want to follow below</h4>
-    <form action="/followUser" method="post">
-        <input type="text" name="username" id="username">
-        <input type="submit" value="Submit">
-    </form>
-    {% if followSuccess == 1 %}
-        <p><b>Follow request sent to {{requestUser}}!</b></p>
-    {% endif %} 
-    {% if followSuccess == 2 %}
-        <p>Can't follow {{requestUser}}. Either you already follow them or they do not exist.</p>
-    {% endif %}
-    <div>
-        <ul>
-            <li><a href="/feed">Event Feed</a></li>
-            <li><a href="/upload">Create New Event</a></li>
-            <li><a href="/logout">Logout</a></li>
-        </ul>
+
+<h1>Hello, {{ username }}.</h1>
+<div class="row">
+    <div class="col-lg-6">
+        <button class="btn btn-outline-success btn-light my-2 my-sm-0" onclick="window.location.href='/upload'">Post your own Event</button>
+        <h3>Or select from the ones below: </h3>
+        {% include "feed.html" %}
     </div>
-	
-	<h1 style="padding-left: 1%; padding-top: 1%;">Events Going</h1>
-	<div class="d-flex flex-row flex-wrap bd-highlight">
+    <div class="col-lg-6">
+        <h1 style="padding-left: 1%; padding-top: 1%;">Events Attending</h1>
+        <div class="d-flex flex-row flex-wrap bd-highlight">
             {% for event in feed %}
-				<div style="align-items: center">
-					<div class="text-dark">
-						<div class="card" style="width: 50rem; height: auto">
-							<h2 class="card-header">{{event.eventName}}</h2>
-							<div class="card-body">
-								<div class="card-text">Host: {{event.eventOwner}}</div>
-								<div class="card-text">Date: {{event.eventDate}}</div>
-								<div class="card-title">Location: {{event.eventLocation}}</div>
-								<div class="card-text">Description :<br>{{event.eventDescription}}</div>
-								<form action="/event" method="GET">
-									<input type="hidden" name="eventID" value={{event.eventID}}>
-									<input class="btn btn-primary" type="submit" value="Details">
-								</form>
-							</div>
-						</div>
-					</div>
-				</div>
+                <div style="align-items: center">
+                    <div class="text-dark">
+                        <div class="card" style="width: 50rem; height: auto">
+                            <h2 class="card-header">{{event.eventName}}</h2>
+                            <div class="card-body">
+                                <div class="card-text">Host: {{event.eventOwner}}</div>
+                                <div class="card-text">Date: {{event.eventDate}}</div>
+                                <div class="card-title">Location: {{event.eventLocation}}</div>
+                                <div class="card-text">Description :<br>{{event.eventDescription}}</div>
+                                <form action="/event" method="GET">
+                                    <input type="hidden" name="eventID" value={{event.eventID}}>
+                                    <input class="btn btn-primary" type="submit" value="Details">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             {% endfor %}
         </div>
+    </div>
+</div>
 </body>
 {% endblock %}
