@@ -129,15 +129,6 @@
         <BoundPropertyFloat Name="Volume" Value="1" />
       </BoundProperties>
     </VideoClip>
-    <VideoClip extentID="74" gapBefore="0" mediaItemID="4" inTime="3.8971127333333015" outTime="34.267779399999995" speed="1" stabilizationMode="0">
-      <Effects />
-      <Transitions />
-      <BoundProperties>
-        <BoundPropertyBool Name="Mute" Value="false" />
-        <BoundPropertyInt Name="rotateStepNinety" Value="0" />
-        <BoundPropertyFloat Name="Volume" Value="1" />
-      </BoundProperties>
-    </VideoClip>
     <VideoClip extentID="76" gapBefore="0" mediaItemID="5" inTime="9.1179791666666574" outTime="33.366545700000003" speed="1" stabilizationMode="0">
       <Effects />
       <Transitions />
@@ -236,7 +227,7 @@
         <BoundPropertyInt Name="rotateStepNinety" Value="0" />
       </BoundProperties>
     </ImageClip>
-    <AudioClip extentID="92" gapBefore="750.96218750000003" mediaItemID="26" inTime="0.47454166666670972" outTime="2.2032291666666879" speed="1">
+    <AudioClip extentID="92" gapBefore="751.36215346272775" mediaItemID="26" inTime="0.47454166666670972" outTime="2.2032291666666879" speed="1">
       <Effects />
       <Transitions />
       <BoundProperties>
@@ -244,6 +235,15 @@
         <BoundPropertyFloat Name="Volume" Value="1" />
       </BoundProperties>
     </AudioClip>
+    <VideoClip extentID="94" gapBefore="0" mediaItemID="4" inTime="4.7784043999999994" outTime="34.267779399999995" speed="1" stabilizationMode="0">
+      <Effects />
+      <Transitions />
+      <BoundProperties>
+        <BoundPropertyBool Name="Mute" Value="false" />
+        <BoundPropertyInt Name="rotateStepNinety" Value="0" />
+        <BoundPropertyFloat Name="Volume" Value="1" />
+      </BoundProperties>
+    </VideoClip>
     <AudioClip extentID="41" gapBefore="0" mediaItemID="12" inTime="0" outTime="0" speed="1">
       <Effects />
       <Transitions />
@@ -319,7 +319,7 @@
         <ExtentRef id="23" />
         <ExtentRef id="71" />
         <ExtentRef id="69" />
-        <ExtentRef id="74" />
+        <ExtentRef id="94" />
         <ExtentRef id="76" />
         <ExtentRef id="77" />
         <ExtentRef id="87" />
