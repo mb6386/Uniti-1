@@ -12,10 +12,10 @@ app.secret_key = "super secret key"
 IMAGES_DIR = os.path.join(os.getcwd(), "images")
 connection = pymysql.connect(host="localhost",
                              user="root",
-                             password="password",
+                             password="",
                              db="uniti",
                              charset="utf8mb4",
-                             port=3306,
+                             port=3308,
                              cursorclass=pymysql.cursors.DictCursor,
                              autocommit=True)
 
@@ -41,14 +41,24 @@ def index():
 @login_required
 def home():
     username = session["username"]
-    feedQuery = "SELECT * FROM events NATURAL JOIN eventgoing WHERE attendee = (SELECT usernameFollowed FROM follow WHERE usernameFollower = %s)"
-    with connection.cursor() as cursor:
-        cursor.execute(feedQuery, (username))
-        feed_data = cursor.fetchall()
+    #feedQuery = "SELECT * FROM events NATURAL JOIN eventgoing WHERE attendee = (SELECT usernameFollowed FROM follow WHERE usernameFollower = %s)"
+    #with connection.cursor() as cursor:
+    #    cursor.execute(feedQuery, (username))
+    #    feed_data = cursor.fetchall()
     login = False
+    eventQuery = "SELECT * FROM events"
+    with connection.cursor() as cursor:
+        cursor.execute(eventQuery)
+        event_data = cursor.fetchall()
+        print(event_data)
+    eventAttendedQuery = "SELECT * FROM events WHERE eventID = (SELECT eventID FROM eventgoing WHERE attendee = %s)"
+    with connection.cursor() as cursor:
+        cursor.execute(eventAttendedQuery, (username))
+        eventAttending_data = cursor.fetchall()
+        print(eventAttending_data)
     if "username" in session:
         login = True
-    return render_template("home.html", feed=feed_data, username=session["username"], login=login)
+    return render_template("home.html", feed=event_data, username=session["username"], login=login, eventsAttending=eventAttending_data)
 
 # create event page
 @app.route("/upload", methods=["GET"])
@@ -145,6 +155,13 @@ def checkUser():
                                 (user_data["dob"].split('-')[1]) == int(today.split('-')[1]) and int(
                         user_data["dob"].split('-')[2]) > int(today.split('-')[2])):
             age -= 1
+    eventQuery = "SELECT * FROM events WHERE eventOwner = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(eventQuery, (user))
+        try:
+            event_data = cursor.fetchall()[0]
+        except:
+            event_data = None
 
     followQuery = "SELECT * FROM follow WHERE usernameFollowed = %s AND usernameFollower = %s"
     with connection.cursor() as cursor:
@@ -154,10 +171,28 @@ def checkUser():
             followStatus = "Follow"
         else:
             followStatus = "Unfollow"
+    followQuery = "SELECT usernameFollower FROM follow WHERE usernameFollowed = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(followQuery, (user))
+        try:
+            follow = cursor.fetchall()
+            print(follow)
+            follow_count = str(len(follow))
+            print(follow_count)
+        except: follow_count = 0
+    followedQuery = "SELECT usernameFollowed FROM follow WHERE usernameFollower = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(followedQuery, (user))
+        try:
+            followed = cursor.fetchall()
+            print(followed)
+            followed_count = str(len(followed))
+            print(followed_count)
+        except: followed_count = 0
     login = False
     if "username" in session:
         login = True
-    return render_template("otherUserprofile.html", feed=feed_data, user=user_data, age=age, followStatus=followStatus, login=login)
+    return render_template("otherUserprofile.html", feed=feed_data, user=user_data, age=age, followStatus=followStatus, login=login, follow=follow_count, followed=followed_count, event=event_data)
 
 
 @app.route("/profile", methods=["GET"])
@@ -175,10 +210,28 @@ def profile():
         age = int(today.split('-')[0]) - int(user_data["dob"].split('-')[0])
         if int(user_data["dob"].split('-')[1]) > int(today.split('-')[1]) or int((user_data["dob"].split('-')[1]) == int(today.split('-')[1]) and int(user_data["dob"].split('-')[2]) > int(today.split('-')[2])):
             age -= 1
+    followQuery = "SELECT usernameFollower FROM follow WHERE usernameFollowed = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(followQuery, (session["username"]))
+        try:
+            follow = cursor.fetchall()
+            print(follow)
+            follow_count = str(len(follow))
+            print(follow_count)
+        except: follow_count = 0
+    followedQuery = "SELECT usernameFollowed FROM follow WHERE usernameFollower = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(followedQuery, (session["username"]))
+        try:
+            followed = cursor.fetchall()
+            print(followed)
+            followed_count = str(len(followed))
+            print(followed_count)
+        except: followed_count = 0
     login = False
     if "username" in session:
         login = True    
-    return render_template("profile.html", feed=feed_data, user=user_data, age=age, login=login)
+    return render_template("profile.html", feed=feed_data, user=user_data, age=age, login=login, follow=follow_count, followed=followed_count)
 
 
 @app.route("/follow", methods=["GET"])
@@ -212,11 +265,28 @@ def follow():
                                 (user_data["dob"].split('-')[1]) == int(today.split('-')[1]) and int(
                     user_data["dob"].split('-')[2]) > int(today.split('-')[2])):
             age -= 1
-
+    followQuery = "SELECT usernameFollower FROM follow WHERE usernameFollowed = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(followQuery, (followed))
+        try:
+            follow = cursor.fetchall()
+            print(follow)
+            follow_count = str(len(follow))
+            print(follow_count)
+        except: follow_count = 0
+    followedQuery = "SELECT usernameFollowed FROM follow WHERE usernameFollower = %s"
+    with connection.cursor() as cursor:
+        cursor.execute(followedQuery, (followed))
+        try:
+            followed = cursor.fetchall()
+            print(followed)
+            followed_count = str(len(followed))
+            print(followed_count)
+        except: followed_count = 0
     login = False
     if "username" in session:
         login = True
-    return render_template("otherUserprofile.html", feed=feed_data, user=user_data, age=age, followStatus=followStatus, login=login)
+    return render_template("otherUserprofile.html", feed=feed_data, user=user_data, age=age, followStatus=followStatus, login=login, follow=follow_count, followed=followed_count)
 
 
 @app.route("/event", methods=["GET"])

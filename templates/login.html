@@ -17,8 +17,9 @@
                 <label for="password">Password</label>
                 <input type="password" class="form-control" name="password" id="password" placeholder="Password">
             </div>
-            <button type="submit" class="btn btn-primary">Login</button>
+                <button type="submit" class="btn btn-primary" style="margin-left: 20px">Login</button>
             </form>
+                <button class="btn btn-outline-success btn-light my-2 my-sm-0" onclick="window.location.href='/register'">Register</button>
         </div>
         {% if error %}
             {{ error }}

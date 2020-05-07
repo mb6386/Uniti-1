@@ -10,6 +10,9 @@ html, body {
   color: white;
 }
 
+.profilePic {
+  border-radius: 50%;
+}
 .center {
   position: absolute;
   top: 50%;
